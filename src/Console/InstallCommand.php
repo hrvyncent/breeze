@@ -22,6 +22,7 @@ class InstallCommand extends Command
      * @var string
      */
     protected $signature = 'breeze:install {stack : The development stack that should be installed (blade,react,vue,api)}
+                            {--no-auth : Indicate that the auth scaffolding should not be include in installation}
                             {--dark : Indicate that dark mode support should be installed}
                             {--inertia : Indicate that the Vue Inertia stack should be installed (Deprecated)}
                             {--pest : Indicate that Pest should be installed}

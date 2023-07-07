@@ -42,13 +42,15 @@ trait InstallsInertiaStacks
             });
         }
 
-        // Controllers...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/app/Http/Controllers', app_path('Http/Controllers'));
-
-        // Requests...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/app/Http/Requests', app_path('Http/Requests'));
+        if (! $this->option('no-auth')) {
+            // Controllers...
+            (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers'));
+            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/app/Http/Controllers', app_path('Http/Controllers'));
+            
+            // Requests...
+            (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests'));
+            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/app/Http/Requests', app_path('Http/Requests'));
+        }
 
         // Middleware...
         $this->installMiddlewareAfter('SubstituteBindings::class', '\App\Http\Middleware\HandleInertiaRequests::class');
@@ -59,28 +61,30 @@ trait InstallsInertiaStacks
         // Views...
         copy(__DIR__.'/../../stubs/inertia-vue/resources/views/app.blade.php', resource_path('views/app.blade.php'));
 
+        if (!$this->option('no-auth')) {
         // Components + Pages...
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Components'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Layouts'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Pages'));
+            (new Filesystem)->ensureDirectoryExists(resource_path('js/Components'));
+            (new Filesystem)->ensureDirectoryExists(resource_path('js/Layouts'));
+            (new Filesystem)->ensureDirectoryExists(resource_path('js/Pages'));
 
-        if ($this->option('typescript')) {
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Components', resource_path('js/Components'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Layouts', resource_path('js/Layouts'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Pages', resource_path('js/Pages'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/types', resource_path('js/types'));
-        } else {
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Components', resource_path('js/Components'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Layouts', resource_path('js/Layouts'));
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Pages', resource_path('js/Pages'));
-        }
-
-        if (! $this->option('dark')) {
-            $this->removeDarkClasses((new Finder)
-                ->in(resource_path('js'))
-                ->name('*.vue')
-                ->notName('Welcome.vue')
-            );
+            if ($this->option('typescript')) {
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Components', resource_path('js/Components'));
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Layouts', resource_path('js/Layouts'));
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/Pages', resource_path('js/Pages'));
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-ts/resources/js/types', resource_path('js/types'));
+            } else {
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Components', resource_path('js/Components'));
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Layouts', resource_path('js/Layouts'));
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Pages', resource_path('js/Pages'));
+            }
+            
+            if (! $this->option('dark')) {
+                $this->removeDarkClasses((new Finder)
+                    ->in(resource_path('js'))
+                    ->name('*.vue')
+                    ->notName('Welcome.vue')
+                );
+            }
         }
 
         // Tests...
@@ -88,10 +92,12 @@ trait InstallsInertiaStacks
             return 1;
         }
 
-        if ($this->option('pest')) {
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/pest-tests/Feature', base_path('tests/Feature'));
-        } else {
-            (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/tests/Feature', base_path('tests/Feature'));
+        if (!$this->option('no-auth')) {
+            if ($this->option('pest')) {
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/pest-tests/Feature', base_path('tests/Feature'));
+            } else {
+                (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/tests/Feature', base_path('tests/Feature'));
+            }
         }
 
         // Routes...
@@ -99,8 +105,9 @@ trait InstallsInertiaStacks
         copy(__DIR__.'/../../stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
 
         // "Dashboard" Route...
-        $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
-
+        if (! $this->option('no-auth')) {
+            $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
+        }
         // Tailwind / Vite...
         copy(__DIR__.'/../../stubs/default/resources/css/app.css', resource_path('css/app.css'));
         copy(__DIR__.'/../../stubs/default/postcss.config.js', base_path('postcss.config.js'));
