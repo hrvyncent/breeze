@@ -100,9 +100,11 @@ trait InstallsInertiaStacks
             }
         }
 
-        // Routes...
-        copy(__DIR__.'/../../stubs/inertia-common/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
+        if (!$this->option('no-auth')) {
+            // Routes...
+            copy(__DIR__.'/../../stubs/inertia-common/routes/web.php', base_path('routes/web.php'));
+            copy(__DIR__.'/../../stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
+        }
 
         // "Dashboard" Route...
         if (! $this->option('no-auth')) {
